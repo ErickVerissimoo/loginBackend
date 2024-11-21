@@ -1,5 +1,10 @@
 package com.springsimplelogin.simplelogin;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.session.Session;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.springsimplelogin.simplelogin.entities.User;
@@ -9,10 +14,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
 
 
 @RestController
@@ -20,25 +26,41 @@ public class restMain {
     @Autowired
     private UserRepository repo;
     @Autowired private serviceUser service;
-    @PostMapping("/cadastro")
-    public String cadastrar(@RequestBody User user) {
-        User usuario = new User();
-        usuario.setEmail(user.getEmail());
-    
-        usuario.setPassword(user.getPassword());
-        repo.save(usuario);
-        return "Usuario cadastrado";
+   
+
+    @PostMapping("/cadastrar")
+    public ResponseEntity<String> cadastrar(@RequestBody User user){
+        try{
+        service.add(user);
+        return ResponseEntity.ok("Usuario cadastrado");
+    }
+        catch(Exception e){
+            System.out.println("erro: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+
+        
     }
     @PostMapping("/login")
-    public ResponseEntity<Void> login(HttpSession sessao, @RequestBody User user, HttpServletResponse response) {
+    public ResponseEntity<String> postMethodName(@RequestBody User user, HttpSession sessao, 
+    HttpServletResponse response) {
         if(service.exists(user)){
-            Cookie cook = new Cookie("sessionid", sessao.getId());
+            Cookie cook = new Cookie("sessionID", sessao.getId());
             cook.setHttpOnly(true);
-            response.addCookie(cook);    
-            return ResponseEntity.ok().build();
+            cook.setPath("/");
+            response.addCookie(cook);
+            user.setSessionId(sessao.getId());
+            return ResponseEntity.ok("Usuario autenticado");
         }
-  return ResponseEntity.notFound().build();
+        
+        return ResponseEntity.badRequest().build();
     }
-  
+    @GetMapping("/getcook")
+    public String getMethodName(@CookieValue(name = "sessionID") String cookie) {
+    
+        return "O nome do cookie é: " + cookie;
+    }
+    
     
 }

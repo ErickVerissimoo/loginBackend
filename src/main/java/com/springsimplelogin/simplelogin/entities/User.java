@@ -1,8 +1,8 @@
 package com.springsimplelogin.simplelogin.entities;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
@@ -13,6 +13,8 @@ public class User {
     @JsonIgnore
     private Integer id;
     private String email;
+    
     private String password;
-
+    @JsonIgnore
+    private String sessionId;
 }
