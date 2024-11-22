@@ -2,7 +2,6 @@ package com.springsimplelogin.simplelogin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.session.Session;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +15,6 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -26,7 +24,7 @@ public class restMain {
     @Autowired
     private UserRepository repo;
     @Autowired private serviceUser service;
-   
+    @Autowired private SessionService session;
 
     @PostMapping("/cadastrar")
     public ResponseEntity<String> cadastrar(@RequestBody User user){
@@ -44,13 +42,14 @@ public class restMain {
     }
     @PostMapping("/login")
     public ResponseEntity<String> postMethodName(@RequestBody User user, HttpSession sessao, 
-    HttpServletResponse response) {
+    HttpServletResponse response) throws Exception {
         if(service.exists(user)){
             Cookie cook = new Cookie("sessionID", sessao.getId());
             cook.setHttpOnly(true);
             cook.setPath("/");
             response.addCookie(cook);
-            user.setSessionId(sessao.getId());
+        
+            session.associateUser(    repo.findByEmail(user.getEmail()));
             return ResponseEntity.ok("Usuario autenticado");
         }
         

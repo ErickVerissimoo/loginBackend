@@ -2,6 +2,7 @@ package com.springsimplelogin.simplelogin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.springsimplelogin.simplelogin.entities.User;
 import com.springsimplelogin.simplelogin.entities.UserRepository;
@@ -25,6 +26,7 @@ return true;
     }
     return false;
 }
+
 public void add(User user) throws Exception {
     if (repo.findByEmail(user.getEmail()) != null) {
         throw new EntityAlreadyExistsException("Email já cadastrado.");
@@ -32,7 +34,11 @@ public void add(User user) throws Exception {
     
     repo.save(user);
 }
-
-
-
+@Transactional
+public void addSession(String sessionID, Integer id){
+repo.addSession(sessionID, id);
 }
+}
+
+
+
